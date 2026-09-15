@@ -1,0 +1,22 @@
+`ls -ld /tmp` prints something like `drwxrwxrwt`.
+
+The last letter is `t`, not `x`. Every folder on the machine that
+everybody writes into has it.
+---
+That `t` is one extra bit on the folder. What it does: inside this
+folder, you may only remove a name if you own the file it points
+to (or you own the folder, or you are root).
+
+Challenge 6 showed that `w` on a folder lets you delete anything
+in it. This bit takes that back, one file at a time.
+---
+`chmod` accepts a fourth digit in front of the usual three. The
+value for this bit is 1.
+
+You want to keep the folder's `777`.
+---
+    sudo chmod 1777 /opt/lab/ch07/shared
+
+You can also write it as `sudo chmod +t /opt/lab/ch07/shared`.
+
+`ls -ld` will now show `drwxrwxrwt`, exactly like `/tmp`.

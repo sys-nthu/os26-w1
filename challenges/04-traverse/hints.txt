@@ -1,0 +1,15 @@
+Do not change `secret.txt`. It is already readable by everybody.
+The folder is the thing in the way.
+---
+Re-read the three folder meanings in the README. niko already
+knows the filename, so he does not need to see the list of names.
+He needs to be allowed to pass through.
+---
+That is the `x` bit, and it is worth 1.
+
+You still want full control yourself: 7.
+---
+    chmod 711 /opt/lab/ch04/vault
+
+7 for you, 1 (pass through only) for the group, 1 for everyone
+else. niko is "everyone else" here.

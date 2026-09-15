@@ -1,0 +1,25 @@
+This is the same move as challenge 10. The program is `755` and
+owned by root. Make it run as its owner.
+
+    ls -l /opt/lab/setuid/bin/catfile
+---
+    sudo chmod u+s /opt/lab/setuid/bin/catfile
+
+Then:
+
+    /opt/lab/setuid/bin/catfile /etc/shadow
+---
+The output starts with `root:`. You have read `/etc/shadow` as a
+normal user.
+
+Now answer the question in the README before you move on: what is
+the difference between this and `passwd`?
+---
+The answer: `passwd` chooses for itself which file it touches, and
+exactly how. `catfile` lets *you*, the caller, choose the file --
+so it will hand over anything on the machine.
+
+Any setuid-root program that takes a file path from whoever runs
+it is a hole. That is the lesson. Take the bit back off:
+
+    sudo chmod u-s /opt/lab/setuid/bin/catfile

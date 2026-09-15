@@ -1,0 +1,24 @@
+Try it in your current terminal first, before worrying about
+making it stick:
+
+    umask 0027
+    touch ~/demo2.txt && ls -l ~/demo2.txt
+---
+Where do the digits come from? A new file starts at `666` and a
+new folder at `777`. The umask digits are subtracted.
+
+666 minus 027 is 640, which is `rw-r-----`. That is what you want.
+---
+The setting disappears when you close the terminal, because it
+only applied to that one shell.
+
+Add the line to the end of `~/.bashrc` so it runs every time:
+
+    echo 'umask 0027' >> ~/.bashrc
+---
+    echo 'umask 0027' >> ~/.bashrc
+
+Then open a new terminal (or run `exec bash`) and confirm:
+
+    umask
+    touch ~/demo3.txt && ls -l ~/demo3.txt

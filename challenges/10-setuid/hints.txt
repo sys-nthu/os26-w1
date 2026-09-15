@@ -1,0 +1,24 @@
+The program needs to run as its owner, `vaultadm`, instead of as
+whoever launched it. There is one permission bit that does exactly
+that.
+
+    ls -l /opt/lab/setuid/bin/checkpw
+---
+It is the "set user id" bit. When it is on, the program runs with
+the identity of its owner, no matter who started it.
+
+In `ls -l` it shows up as an `s` where the owner's `x` normally
+is: `-rwsr-xr-x`.
+---
+Set it with `u+s`, or with a `4` as a fourth digit in front of the
+mode. The program is currently `755`.
+
+Do not touch `passwords.txt`. That is the whole point -- you are
+not gaining the permission, the program is.
+---
+    sudo chmod u+s /opt/lab/setuid/bin/checkpw
+
+(equivalently `sudo chmod 4755 ...`)
+
+Now `checkpw niko hunter2` runs as `vaultadm`, which *can* open the
+store -- while you still cannot `cat` it yourself.

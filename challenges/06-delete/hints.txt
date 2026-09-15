@@ -1,0 +1,20 @@
+You are not allowed to touch the file. So look at everything else
+in the picture.
+
+    ls -ld /opt/lab/ch06/dropbox
+---
+When you delete something, what actually changes on disk? The
+file's contents do not change -- the file stops existing. What
+changed is the *list of names* in the folder.
+---
+Changing the list of names in a folder needs `w` on the folder.
+nini has no `w` on `dropbox`.
+---
+    sudo chmod 777 /opt/lab/ch06/dropbox
+
+`sudo chmod 757` works too, and so does putting the folder in a group
+nini belongs to and using `775`.
+
+The lesson: permission to delete a file has nothing to do with the
+file. It lives on the folder, because removing a name is a change
+to the folder.

@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+# perm -- the Linux permissions playground driver.
+#
+#   perm            progress board
+#   perm start N    reset challenge N and print its README
+#   perm check N    verify challenge N
+#   perm hint N     reveal the next hint for challenge N
+#   perm reset N    reset challenge N silently ("all" resets everything)
+#   perm status     one-line summary
+
+set -uo pipefail
+
+PERM_CONF=/etc/perm.conf
+
+not_installed() {
+    cat >&2 <<'MSG'
+The playground is not installed yet (or a container rebuild wiped it).
+
+  cd into the repository and run:
+
+      sudo ./setup.sh
+
+MSG
+    exit 1
+}
+
+[ -r "$PERM_CONF" ] || not_installed
+# shellcheck disable=SC1090
+. "$PERM_CONF"
+[ -d "${LAB_ROOT:-/opt/lab}" ] || not_installed
+[ -d "${REPO_ROOT:-/nonexistent}/challenges" ] || {
+    echo "error: REPO_ROOT ($REPO_ROOT) no longer holds the challenges." >&2
+    echo "       Re-run  sudo ./setup.sh  from the repository." >&2
+    exit 1
+}
+
+# Check scripts have to run commands as nini and niko, so we need root.
+# Carry the resolved student name across the re-exec explicitly.
+if [ "$(id -u)" -ne 0 ]; then
+    exec sudo -n env STUDENT="$STUDENT" REPO_ROOT="$REPO_ROOT" LAB_ROOT="$LAB_ROOT" \
+        bash "$0" "$@"
+fi
+
+# shellcheck disable=SC1091
+. "$REPO_ROOT/lib/common.sh"
+
+TOTAL=12
+
+# ------------------------------------------------------------- utilities ---
+ch_dir() {
+    local n dir
+    n="$(printf '%02d' "$1" 2>/dev/null)" || return 1
+    dir=$(echo "$REPO_ROOT/challenges/$n"-*)
+    [ -d "$dir" ] || return 1
+    printf '%s\n' "$dir"
+}
+
+valid_n() {
+    case "${1:-}" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    [ "$1" -ge 1 ] && [ "$1" -le "$TOTAL" ]
+}
+
+need_n() {
+    if ! valid_n "${1:-}"; then
+        echo "error: give a challenge number from 1 to $TOTAL" >&2
+        exit 1
+    fi
+}
+
+title_of() {
+    local dir="$1" TITLE=''
+    # shellcheck disable=SC1091
+    [ -r "$dir/meta.env" ] && . "$dir/meta.env"
+    printf '%s\n' "${TITLE:-(untitled)}"
+}
+
+run_challenge() {         # run_challenge <dir> <setup.sh|check.sh>
+    local dir="$1" script="$2"
+    CH_DIR="$dir" LAB_ROOT="$LAB_ROOT" STUDENT="$STUDENT" REPO_ROOT="$REPO_ROOT" \
+        bash "$dir/$script"
+}
+
+# ------------------------------------------------------------------ list ---
+cmd_list() {
+    local n dir tmp rc solved=0
+    tmp="$(mktemp -d)"
+
+    # Run all twelve checks at once so the board stays snappy.
+    for n in $(seq 1 "$TOTAL"); do
+        dir="$(ch_dir "$n")" || continue
+        ( run_challenge "$dir" check.sh >"$tmp/$n.out" 2>&1; echo $? >"$tmp/$n.rc" ) &
+    done
+    wait
+
+    printf '\n  %sLinux permissions playground%s\n\n' "$C_BOLD" "$C_OFF"
+    for n in $(seq 1 "$TOTAL"); do
+        dir="$(ch_dir "$n")" || continue
+        rc="$(cat "$tmp/$n.rc" 2>/dev/null || echo 1)"
+        if [ "$rc" -eq 0 ]; then
+            solved=$((solved + 1))
+            printf '   %2d  %s✓%s  %s\n' "$n" "$C_GREEN" "$C_OFF" "$(title_of "$dir")"
+        else
+            printf '   %2d  %s✗%s  %s\n' "$n" "$C_RED" "$C_OFF" "$(title_of "$dir")"
+        fi
+    done
+    rm -rf "$tmp"
+
+    printf '\n  %s%d of %d solved.%s\n' "$C_BOLD" "$solved" "$TOTAL" "$C_OFF"
+    if [ "$solved" -lt "$TOTAL" ]; then
+        printf '  %sperm start N%s to begin a challenge, %sperm check N%s to test it.\n\n' \
+            "$C_YELLOW" "$C_OFF" "$C_YELLOW" "$C_OFF"
+    else
+        printf '  Nothing left to break. Well done.\n\n'
+    fi
+}
+
+cmd_status() {
+    local n dir tmp solved=0
+    tmp="$(mktemp -d)"
+    for n in $(seq 1 "$TOTAL"); do
+        dir="$(ch_dir "$n")" || continue
+        ( run_challenge "$dir" check.sh >/dev/null 2>&1; echo $? >"$tmp/$n.rc" ) &
+    done
+    wait
+    for n in $(seq 1 "$TOTAL"); do
+        [ "$(cat "$tmp/$n.rc" 2>/dev/null || echo 1)" -eq 0 ] && solved=$((solved + 1))
+    done
+    rm -rf "$tmp"
+    echo "$solved/$TOTAL solved"
+}
+
+# ----------------------------------------------------------------- start ---
+cmd_reset() {
+    local n dir
+    if [ "${1:-}" = all ]; then
+        for n in $(seq 1 "$TOTAL"); do
+            dir="$(ch_dir "$n")" || continue
+            run_challenge "$dir" setup.sh
+        done
+        echo "All $TOTAL challenges reset."
+        return 0
+    fi
+    need_n "${1:-}"
+    dir="$(ch_dir "$1")" || die "no such challenge"
+    run_challenge "$dir" setup.sh
+}
+
+cmd_start() {
+    local n dir
+    need_n "${1:-}"
+    n="$1"
+    dir="$(ch_dir "$n")" || die "no such challenge"
+    run_challenge "$dir" setup.sh
+    printf '\n%s──────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_OFF"
+    printf '%sChallenge %d: %s%s\n' "$C_BOLD" "$n" "$(title_of "$dir")" "$C_OFF"
+    printf '%s──────────────────────────────────────────────────────────%s\n\n' "$C_DIM" "$C_OFF"
+    cat "$dir/README.md"
+    printf '\n%s──────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_OFF"
+    printf 'When you think you have it:  %sperm check %d%s\n' "$C_YELLOW" "$n" "$C_OFF"
+    printf 'Stuck?                       %sperm hint %d%s\n\n' "$C_YELLOW" "$n" "$C_OFF"
+}
+
+# ----------------------------------------------------------------- check ---
+cmd_check() {
+    local n dir rc
+    need_n "${1:-}"
+    n="$1"
+    dir="$(ch_dir "$n")" || die "no such challenge"
+    printf '\n%sChallenge %d: %s%s\n\n' "$C_BOLD" "$n" "$(title_of "$dir")" "$C_OFF"
+    run_challenge "$dir" check.sh
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
+        printf '\n  %s%sPASSED%s\n\n' "$C_BOLD" "$C_GREEN" "$C_OFF"
+    else
+        printf '\n  %sNot yet.%s  Try %sperm hint %d%s\n\n' "$C_RED" "$C_OFF" "$C_YELLOW" "$n" "$C_OFF"
+    fi
+    return "$rc"
+}
+
+# ------------------------------------------------------------------ hint ---
+cmd_hint() {
+    local n dir file nblocks seen state
+    need_n "${1:-}"
+    n="$1"
+    dir="$(ch_dir "$n")" || die "no such challenge"
+    file="$dir/hints.txt"
+    [ -r "$file" ] || die "challenge $n has no hints"
+
+    nblocks="$(awk 'BEGIN{c=1} /^---$/{c++} END{print c}' "$file")"
+
+    state="$STUDENT_HOME/.perm"
+    mkdir -p "$state"
+    chown "$STUDENT" "$state" 2>/dev/null
+    seen=0
+    [ -r "$state/hints-$(printf '%02d' "$n")" ] && \
+        seen="$(cat "$state/hints-$(printf '%02d' "$n")")"
+    case "$seen" in ''|*[!0-9]*) seen=0 ;; esac
+
+    if [ "$seen" -lt "$nblocks" ]; then
+        seen=$((seen + 1))
+        printf '%s\n' "$seen" > "$state/hints-$(printf '%02d' "$n")"
+        chown "$STUDENT" "$state/hints-$(printf '%02d' "$n")" 2>/dev/null
+    fi
+
+    if [ "$seen" -ge "$nblocks" ]; then
+        printf '\n  %sAnswer for challenge %d%s\n\n' "$C_BOLD$C_YELLOW" "$n" "$C_OFF"
+    else
+        printf '\n  %sHint %d of %d%s\n\n' "$C_BOLD" "$seen" "$((nblocks - 1))" "$C_OFF"
+    fi
+    awk -v want="$seen" 'BEGIN{c=1} /^---$/{c++; next} c==want{print "  " $0}' "$file"
+    printf '\n'
+    if [ "$seen" -lt "$nblocks" ]; then
+        printf '  Still stuck? %sperm hint %d%s again.\n\n' "$C_YELLOW" "$n" "$C_OFF"
+    fi
+}
+
+# ------------------------------------------------------------------ main ---
+case "${1:-list}" in
+    list|'')   cmd_list ;;
+    status)    cmd_status ;;
+    start)     cmd_start "${2:-}" ;;
+    check)     cmd_check "${2:-}" ;;
+    hint)      cmd_hint  "${2:-}" ;;
+    reset)     cmd_reset "${2:-}" ;;
+    -h|--help|help)
+        sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+        ;;
+    *)
+        echo "perm: unknown command '$1' (try: perm --help)" >&2
+        exit 1
+        ;;
+esac

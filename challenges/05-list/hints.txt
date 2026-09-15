@@ -1,0 +1,15 @@
+Read the three folder meanings in challenge 4's README again. You
+want the opposite letter this time.
+---
+nini needs the list of names: that is `r` on the folder.
+
+She must not be able to reach the files themselves: that means no
+`x` on the folder.
+---
+Read is 4. Give the folder's "everyone else" slot 4 and nothing
+else. Keep 7 for yourself.
+---
+    chmod 744 /opt/lab/ch05/vault
+
+Compare with challenge 4, which was `711`. Same folder shape, one
+digit different, opposite behaviour.

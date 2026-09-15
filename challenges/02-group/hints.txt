@@ -1,0 +1,13 @@
+`ls -l /opt/lab/ch02/build-notes.txt` shows two names: the owner
+(you) and the group (`eng`). niko gets in through the group.
+---
+The nine permission letters are three groups of three: owner,
+group, everyone else. You only need to change the middle three.
+---
+The group should be able to read, but not write. Read is 4.
+Everyone else -- which is nini -- gets nothing.
+---
+    chmod 640 /opt/lab/ch02/build-notes.txt
+
+6 for you (read + write), 4 for the `eng` group (read only),
+0 for everybody else.

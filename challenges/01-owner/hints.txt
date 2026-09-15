@@ -1,0 +1,17 @@
+Run `ls -l` on the file and read the first ten characters.
+
+Every dash is something nobody is allowed to do. Right now they
+are all dashes.
+---
+You want read and write for yourself, and nothing whatsoever for
+anybody else. nini is "everybody else" here.
+---
+`chmod` takes three digits: one for you, one for your group, one
+for everyone else.
+
+read is 4, write is 2, execute is 1. Add up the ones you want.
+---
+    chmod 600 /opt/lab/ch01/notes.txt
+
+6 is 4+2, read plus write, for you. 0 and 0 for the group and for
+everyone else.

@@ -1,0 +1,15 @@
+The third letter of each group of three is `x`: permission to run
+the file as a program.
+
+`ls -l /opt/lab/ch03/deploy.sh` -- there is no `x` anywhere.
+---
+You want to be able to run it. You do not want niko or nini to be
+able to run it.
+---
+Execute is 1. Read is 4, write is 2. So read + write + execute is
+7, for you only.
+---
+    chmod 700 /opt/lab/ch03/deploy.sh
+
+`chmod 744` also passes: niko and nini can read the script, but
+still cannot run it with `./deploy.sh`.

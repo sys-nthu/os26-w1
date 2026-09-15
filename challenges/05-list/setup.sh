@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -uo pipefail
+# shellcheck disable=SC1091
+. "${REPO_ROOT:?}/lib/common.sh"
+
+CH="$LAB_ROOT/ch05"
+mkdir -p "$CH/vault"; chown root:root "$CH"; chmod 755 "$CH"
+
+cat > "$CH/vault/secret.txt" <<'TXT'
+salary band review, do not circulate
+niko: band 4
+TXT
+cat > "$CH/vault/q3-report.txt" <<'TXT'
+Q3 went fine. Nobody read this file.
+TXT
+
+chown -R "$STUDENT" "$CH/vault"
+chgrp -R "$(id -gn "$STUDENT")" "$CH/vault"
+chmod 644 "$CH/vault/secret.txt" "$CH/vault/q3-report.txt"
+chmod 000 "$CH/vault"
+
+# Strip any setgid/setuid/sticky inherited from a setgid ancestor (see common.sh).
+strip_special_dirs "$CH"
