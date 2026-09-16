@@ -96,7 +96,11 @@ fi
 # --------------------------------------------------------------------------
 say "Checking for required tools"
 missing=()
-need_tool() { command -v "$1" >/dev/null 2>&1 || missing+=("$2"); }
+# Debian puts cowsay and lolcat in /usr/games, which is usually not on PATH
+# (and never on sudo's secure_path), so look there too -- otherwise every
+# re-run would think they are missing and hit apt again.
+have_cmd() { command -v "$1" >/dev/null 2>&1 || [ -x "/usr/games/$1" ] || [ -x "/usr/local/games/$1" ]; }
+need_tool() { have_cmd "$1" || missing+=("$2"); }
 need_tool gcc      gcc
 need_tool make     make
 need_tool lsof     lsof
@@ -105,6 +109,8 @@ need_tool findmnt  util-linux
 need_tool stat     coreutils
 need_tool sudo     sudo
 need_tool useradd  passwd
+need_tool cowsay   cowsay      # challenge 12's reward tool
+need_tool lolcat   lolcat
 
 if [ "${#missing[@]}" -gt 0 ]; then
     say "Installing: ${missing[*]}"
@@ -126,6 +132,10 @@ if ! echo 'int main(void){return 0;}' | gcc -x c -o /dev/null - >/dev/null 2>&1;
     echo 'int main(void){return 0;}' | gcc -x c -o /dev/null - >/dev/null 2>&1 \
         || die "gcc still cannot compile a trivial program; cannot build the lab binaries."
 fi
+
+for t in cowsay lolcat; do
+    have_cmd "$t" || warn "'$t' is not installed; challenge 12's tool will fall back to plain text"
+done
 
 # --------------------------------------------------------------------------
 # 2. the cast

@@ -133,4 +133,15 @@ strip_special_dirs() {  # strip_special_dirs <dir> ...  (recurses into each)
     done
 }
 
+# Absolute path of a command, also checking the game directories Debian uses
+# for cowsay/lolcat (not on most PATHs). Prints the path; fails if not found.
+lookup_cmd() {
+    local p
+    if p="$(command -v "$1" 2>/dev/null)" && [ -x "$p" ]; then printf '%s\n' "$p"; return 0; fi
+    for p in "/usr/games/$1" "/usr/local/games/$1" "/usr/local/bin/$1" "/usr/bin/$1"; do
+        [ -x "$p" ] && { printf '%s\n' "$p"; return 0; }
+    done
+    return 1
+}
+
 die() { printf '%serror:%s %s\n' "$C_RED" "$C_OFF" "$*" >&2; exit 1; }
