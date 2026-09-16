@@ -1,5 +1,5 @@
-Work in three terminals. Terminal 1: `tail -f /tmp/lab12.log`.
-Terminal 2: `rm /tmp/lab12.log`. Watch terminal 1 keep printing.
+Work in three terminals. Terminal 1: `tail -f /tmp/lab11.log`.
+Terminal 2: `rm /tmp/lab11.log`. Watch terminal 1 keep printing.
 ---
 The program is still running and still holding the file open. Find
 its number:
@@ -20,4 +20,4 @@ Copy the still-open file back out through that link:
     tail ~/recovered.log
 
 Check the number -- it may not be `1`. `ls -l /proc/$pid/fd` shows
-which entry points at `lab12.log (deleted)`.
+which entry points at `lab11.log (deleted)`.

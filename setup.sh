@@ -67,7 +67,7 @@ if [ "$MODE" = uninstall ]; then
     pkill -9 -f "$LAB_ROOT/openfile/noisy.sh" 2>/dev/null || true
 
     say "Removing lab state"
-    rm -rf "$LAB_ROOT" "$PERM_CONF" /usr/local/bin/perm /tmp/lab12.log /etc/sudoers.d/perm-lab
+    rm -rf "$LAB_ROOT" "$PERM_CONF" /usr/local/bin/perm /tmp/lab11.log /etc/sudoers.d/perm-lab
 
     student_home="$(getent passwd "$STUDENT" 2>/dev/null | cut -d: -f6 || true)"
     if [ -n "${student_home:-}" ] && [ -f "$student_home/.bashrc" ]; then
@@ -184,7 +184,7 @@ if [ "$MODE" = refresh ]; then
         [ -n "${pid:-}" ] && kill -TERM -- "-$pid" 2>/dev/null || true
     done
     pkill -f "$LAB_ROOT/openfile/noisy.sh" 2>/dev/null || true
-    rm -rf "$LAB_ROOT" /tmp/lab12.log
+    rm -rf "$LAB_ROOT" /tmp/lab11.log
 fi
 
 say "Preparing $LAB_ROOT"
@@ -260,7 +260,7 @@ make -s -C "$REPO_ROOT/src" BINDIR="$LAB_ROOT/setuid/bin" all
 # --------------------------------------------------------------------------
 # 6. the challenges
 # --------------------------------------------------------------------------
-say "Setting up the twelve challenges"
+say "Setting up the challenges"
 for dir in "$REPO_ROOT"/challenges/*/; do
     [ -x "$dir/setup.sh" ] || chmod +x "$dir/setup.sh" 2>/dev/null || true
     CH_DIR="$dir" LAB_ROOT="$LAB_ROOT" STUDENT="$STUDENT" REPO_ROOT="$REPO_ROOT" \
@@ -275,9 +275,9 @@ done
 
 # GNU chmod keeps setuid/setgid/sticky on directories through numeric modes, and
 # on Codespaces /opt is setgid -- so every directory here inherits the setgid
-# bit at creation, which silently pre-solves the setgid challenge. Strip all
-# three special bits from every lab directory (no broken state uses them; the
-# special-bit challenges are solved by the student at run time, not by setup).
+# bit at creation, which makes new files in the lab folders take the wrong
+# group. Strip all three special bits from every lab directory (no broken state
+# uses them; the sticky bit in challenge 7 is set by the student at run time).
 find "$LAB_ROOT" -type d -exec chmod u-s,g-s,-t {} + 2>/dev/null || true
 
 # --------------------------------------------------------------------------

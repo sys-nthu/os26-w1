@@ -1,4 +1,4 @@
-Challenge 10 was the good version. This is the bad one.
+Challenge 9 was the good version. This is the bad one.
 
 Here is a program that prints any file you give it:
 
@@ -19,7 +19,7 @@ you cannot read `/etc/shadow`.
 **Your job**
 
 Make `catfile` setuid root, the same way you made `checkpw` setuid
-`vaultadm` in challenge 10. Then use it to print `/etc/shadow`:
+`vaultadm` in challenge 9. Then use it to print `/etc/shadow`:
 
     sudo chmod u+s /opt/lab/setuid/bin/catfile
     /opt/lab/setuid/bin/catfile /etc/shadow
@@ -44,5 +44,5 @@ Remove the bit again:
 
     sudo chmod u-s /opt/lab/setuid/bin/catfile
 
-`perm reset 11` also does this. Do not leave a setuid-root
+`perm reset 10` also does this. Do not leave a setuid-root
 "print any file" program on the machine, even in a lab.

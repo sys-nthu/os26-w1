@@ -1,6 +1,6 @@
 # Linux Permissions Playground
 
-This playground contains 12 small Linux permission exercises.
+This playground contains 12 small Linux exercises: 11 about permissions, and one about how the shell finds a command.
 
 In each exercise, some files or directories start with the wrong permissions. Your job is to fix them using `chmod` so that the required users can access them, while other users cannot.
 

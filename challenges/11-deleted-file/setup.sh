@@ -6,7 +6,7 @@ set -uo pipefail
 CH="$LAB_ROOT/openfile"
 PIDFILE="$CH/writer.pid"       # the student-owned writer (for /proc recovery)
 LEADFILE="$CH/leader.pid"      # the process-group leader (for a clean kill)
-LOG=/tmp/lab12.log
+LOG=/tmp/lab11.log
 mkdir -p "$CH"; chown root:root "$CH"; chmod 755 "$CH"
 
 # Always stop any previous writer first. Nothing may survive a reset. We launch

@@ -4,7 +4,7 @@ set -uo pipefail
 . "${REPO_ROOT:?}/lib/common.sh"
 
 BIN="$LAB_ROOT/setuid/bin/catfile"
-[ -x "$BIN" ] || { fail "catfile is missing -- run: perm reset 11"; finish; exit $?; }
+[ -x "$BIN" ] || { fail "catfile is missing -- run: perm reset 10"; finish; exit $?; }
 
 # Safety: catfile must never be writable by non-root, setuid or not. Look at
 # the low three octal digits; the group-write (0o20) and other-write (0o02)
@@ -14,7 +14,7 @@ low="$(( 8#${octal: -3} ))"
 if [ $(( low & 022 )) -eq 0 ]; then
     ok "catfile is not writable by group or others"
 else
-    fail "catfile is writable by group or others -- run: perm reset 11"
+    fail "catfile is writable by group or others -- run: perm reset 10"
 fi
 
 # The student genuinely cannot read /etc/shadow directly.

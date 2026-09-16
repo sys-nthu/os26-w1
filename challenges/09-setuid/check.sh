@@ -5,7 +5,7 @@ set -uo pipefail
 
 BIN="$LAB_ROOT/setuid/bin/checkpw"
 STORE="$LAB_ROOT/setuid/vault/passwords.txt"
-[ -x "$BIN" ] && [ -f "$STORE" ] || { fail "the setuid lab is missing -- run: perm reset 10"; finish; exit $?; }
+[ -x "$BIN" ] && [ -f "$STORE" ] || { fail "the setuid lab is missing -- run: perm reset 9"; finish; exit $?; }
 
 grants() {   # grants <user> <pass>  -> exits 0 and prints ACCESS GRANTED
     local out
@@ -25,7 +25,7 @@ want_deny "you still cannot read passwords.txt"       try_read "$STUDENT" "$STOR
 if [ "$(mode_of "$STORE")" = 600 ] && [ "$(owner_of "$STORE")" = "$VAULTADM" ]; then
     ok "passwords.txt is untouched (still 600, still $VAULTADM)"
 else
-    fail "passwords.txt was changed; the point was to leave it alone -- run: perm reset 10"
+    fail "passwords.txt was changed; the point was to leave it alone -- run: perm reset 9"
 fi
 
 finish

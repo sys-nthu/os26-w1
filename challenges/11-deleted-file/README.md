@@ -1,11 +1,11 @@
 This challenge is a guided walkthrough. Read all of it first, and
-use **three terminals**. When you ran `perm start 12`, a small
+use **three terminals**. When you ran `perm start 11`, a small
 program started in the background. Once per second it writes a line
 like
 
-    LAB12 42 2026-01-01T12:00:00
+    LAB11 42 2026-01-01T12:00:00
 
-to the file `/tmp/lab12.log`. It is still running now.
+to the file `/tmp/lab11.log`. It is still running now.
 
 **The situation:** the log file is about to be deleted by accident,
 while the program is still writing to it. Your job is to recover
@@ -19,13 +19,13 @@ even though the original file is gone.
 
 **Terminal 1 -- watch the log grow**
 
-    tail -f /tmp/lab12.log
+    tail -f /tmp/lab11.log
 
 Leave it running. A new line appears every second.
 
 **Terminal 2 -- delete the file**
 
-    rm /tmp/lab12.log
+    rm /tmp/lab11.log
 
 Now look at Terminal 1 again. `tail` *keeps printing new lines*.
 The file no longer has a name, but the program did not notice. It
@@ -61,7 +61,7 @@ moment you copied.
 
 **Last step -- stop the program**
 
-    perm reset 12
+    perm reset 11
 
 Run `df -h /tmp` once more. *Now* the space is free again, because
 nothing has the file open any more.

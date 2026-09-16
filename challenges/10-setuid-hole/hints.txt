@@ -1,4 +1,4 @@
-This is the same move as challenge 10. The program is `755` and
+This is the same move as challenge 9. The program is `755` and
 owned by root. Make it run as its owner.
 
     ls -l /opt/lab/setuid/bin/catfile

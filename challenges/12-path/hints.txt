@@ -1,0 +1,30 @@
+Print the list of folders the shell searches:
+
+    echo $PATH
+
+Read it from left to right. `/opt/lab/ch12/tools` is not there.
+---
+Try adding the folder to the list in your current terminal:
+
+    PATH="$PATH:/opt/lab/ch12/tools"
+    standup
+
+It works now. Open a new terminal and try `standup` again -- it
+is gone, because that change only lived in the one shell.
+---
+Put the line in the file your shell reads every time it starts,
+just like the `umask` line in challenge 8:
+
+    ~/.bashrc
+
+Then open a new terminal.
+---
+    echo 'export PATH="$PATH:/opt/lab/ch12/tools"' >> ~/.bashrc
+
+Open a new terminal and check:
+
+    type -P standup
+    standup
+
+`$PATH` inside the quotes keeps all the folders that were already
+in the list and adds yours to the end.

@@ -18,7 +18,7 @@ Add the line to the end of `~/.bashrc` so it runs every time:
 ---
     echo 'umask 0027' >> ~/.bashrc
 
-Then open a new terminal (or run `exec bash`) and confirm:
+Then open a new terminal and confirm:
 
     umask
     touch ~/demo3.txt && ls -l ~/demo3.txt

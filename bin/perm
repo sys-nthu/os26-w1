@@ -44,7 +44,9 @@ fi
 # shellcheck disable=SC1091
 . "$REPO_ROOT/lib/common.sh"
 
-TOTAL=12
+# Number of challenges = number of NN-name directories, so adding one is
+# just adding a directory.
+TOTAL="$(find "$REPO_ROOT/challenges" -mindepth 1 -maxdepth 1 -type d -name '[0-9][0-9]-*' | wc -l | tr -d ' ')"
 
 # ------------------------------------------------------------- utilities ---
 ch_dir() {
@@ -87,7 +89,7 @@ cmd_list() {
     local n dir tmp rc solved=0
     tmp="$(mktemp -d)"
 
-    # Run all twelve checks at once so the board stays snappy.
+    # Run every check at once so the board stays snappy.
     for n in $(seq 1 "$TOTAL"); do
         dir="$(ch_dir "$n")" || continue
         ( run_challenge "$dir" check.sh >"$tmp/$n.out" 2>&1; echo $? >"$tmp/$n.rc" ) &
